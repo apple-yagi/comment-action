@@ -1,0 +1,83 @@
+name: comment
+
+on:
+  issue_comment:
+    types:
+      - created
+      - edited
+
+permissions:
+  id-token: write
+  issues: read
+  contents: write
+  pull-requests: write
+
+jobs:
+  prerequisites:
+    if: contains(github.event.comment.html_url, '/pull/') && startsWith(github.event.comment.body, '/comment')
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: xt0rted/pull-request-comment-branch@29fe0354c01b30fb3de76f193ab33abf8fe5ddb0 #1.2.0
+        id: upstream_branch
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: hkusu/status-create-action@1040f888115fc10b2e0fa8efc8ef3b85a916af2e #1.0.0
+        with:
+          sha: ${{ steps.upstream_branch.outputs.sha }}
+          state: pending
+          description: Branch:${{steps.upstream_branch.outputs.head_ref}} Commit:${{steps.upstream_branch.outputs.head_sha}}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    outputs:
+      command_name: ${{ steps.command.outputs.command-name }}
+      command_arguments: ${{ steps.command.outputs.command-arguments }}
+      branch_name: ${{ steps.upstream_branch.outputs.head_ref }}
+      commit_sha: ${{ steps.upstream_branch.outputs.head_sha }}
+
+  test:
+    needs: [prerequisites]
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        with:
+          ref: ${{ needs.prerequisites.outputs.branch_name }}
+
+      - name: Run test
+        id: test
+        run: exit 1
+        continue-on-error: true
+
+      - if: steps.test.outcome == 'success'
+        name: Create comment
+        uses: peter-evans/create-or-update-comment@23ff15729ef2fc348714a3bb66d2f655ca9066f2 # v3
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            ## ✅ Run test Success
+
+      - if: steps.test.outcome == 'failure'
+        name: Create comment
+        uses: peter-evans/create-or-update-comment@23ff15729ef2fc348714a3bb66d2f655ca9066f2 # v3
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            ## ❌ Run test Failure
+
+      - if: steps.test.outcome == 'success'
+        name: Notify successful status
+        uses: hkusu/status-create-action@1040f888115fc10b2e0fa8efc8ef3b85a916af2e
+        with:
+          sha: ${{ needs.prerequisites.outputs.commit_sha }}
+          state: success
+          description: Successful
+
+      - if: steps.test.outcome == 'failure'
+        name: Notify failed status
+        uses: hkusu/status-create-action@1040f888115fc10b2e0fa8efc8ef3b85a916af2e
+        with:
+          sha: ${{ needs.prerequisites.outputs.commit_sha }}
+          state: failure
+          description: Failed
