@@ -63,13 +63,13 @@ jobs:
       - if: ${{ !startsWith(github.event.comment.body, '/test-update-snapshots') }}
         name: Run test
         id: test
-        run: npx playwright@1.37.1 test
+        run: npm run test
         continue-on-error: true
 
       - if: startsWith(github.event.comment.body, '/test-update-snapshots')
         name: Run test with update snapshots
         id: test-update-snapshots
-        run: npx playwright@1.37.1 test --update-snapshots
+        run: npm run test --update-snapshots
         continue-on-error: true
 
       - if: startsWith(github.event.comment.body, '/test-update-snapshots')
