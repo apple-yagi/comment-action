@@ -46,7 +46,30 @@ jobs:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
         with:
           ref: ${{ needs.prerequisites.outputs.branch_name }}
-  
+
+      - name: Setup environment
+        run: |
+          sub_domain=""
+          branch=main
+
+          body_array=(${{ github.event.comment.body }})
+          for i in "${!body_array[@]}"; do
+            if [[ "${body_array[$i]}" == "-s" ]]; then
+              sub_domain=${body_array[$i+1]}
+            fi
+            if [[ "${body_array[$i]}" == "-b" ]]; then
+              branch=${body_array[$i+1]}
+            fi
+          done
+
+          echo "SUB_DOMAIN=$sub_domain" >> $GITHUB_ENV
+          echo "BRANCH=$branch" >> $GITHUB_ENV
+
+      - name: Echo environment
+        run: |
+          echo ${{ env.SUB_DOMAIN }}
+          echo ${{ env.BRANCH }}
+
       - name: Install japanese font
         run: sudo apt-get install fonts-ipafont-gothic
 
