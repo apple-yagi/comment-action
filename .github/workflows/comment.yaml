@@ -72,7 +72,6 @@ jobs:
         name: Diff
         id: diff
         run: |
-          git config --global --add safe.directory /__w/comment-action/comment-action
           git config --global user.name actions-user
           git config --global user.email action@github.com
           git add -N .
