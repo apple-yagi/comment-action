@@ -48,7 +48,7 @@ jobs:
           ref: ${{ needs.prerequisites.outputs.branch_name }}
   
       - name: Install japanese font
-        run: apt-get install fonts-ipafont-gothic
+        run: sudo apt-get install fonts-ipafont-gothic
 
       - name: Install dependencies
         run: npm install
