@@ -73,6 +73,9 @@ jobs:
         name: Diff
         id: diff
         run: |
+          git config --global --add safe.directory /__w/comment-action/comment-action
+          git config --global user.name actions-user
+          git config --global user.email action@github.com
           git add -N .
           git diff --name-only --exit-code
         continue-on-error: true
@@ -80,11 +83,7 @@ jobs:
       - if: steps.diff.outcome == 'failure'
         name: Commit diff
         run: |
-          set -x
-          git config --global --add safe.directory /__w/comment-action/comment-action
-          git config --global user.name actions-user
-          git config --global user.email action@github.com
-          git add .
+          git add -A .
           git commit -m "Update snapshots"
 
       - if: steps.test.outcome == 'success' || steps.test-update-snapshots.outcome == 'success'
