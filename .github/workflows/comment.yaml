@@ -57,7 +57,7 @@ jobs:
       - name: Install japanese font
         run: apt-get install fonts-ipafont-gothic
 
-      - if: startsWith(github.event.comment.body, '/test')
+      - if: ${{ !startsWith(github.event.comment.body, '/test-update-snapshots') }}
         name: Run test
         id: test
         run: npx playwright@1.37.1 test
