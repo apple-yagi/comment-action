@@ -57,16 +57,19 @@ jobs:
       - name: Install japanese font
         run: apt-get install fonts-ipafont-gothic
 
+      - name: Install dependencies
+        run: npm install -g playwright@1.37.1
+
       - if: ${{ !startsWith(github.event.comment.body, '/test-update-snapshots') }}
         name: Run test
         id: test
-        run: npx playwright test
+        run: npx playwright@1.37.1 test
         continue-on-error: true
 
       - if: startsWith(github.event.comment.body, '/test-update-snapshots')
         name: Run test with update snapshots
         id: test-update-snapshots
-        run: npx playwright test --update-snapshots
+        run: npx playwright@1.37.1 test --update-snapshots
         continue-on-error: true
 
       - if: startsWith(github.event.comment.body, '/test-update-snapshots')
