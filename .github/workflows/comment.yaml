@@ -84,6 +84,7 @@ jobs:
         run: |
           git add -A .
           git commit -m "Update snapshots"
+          git push origin ${{ needs.prerequisites.outputs.branch_name }}
 
       - if: steps.test.outcome == 'success' || steps.test-update-snapshots.outcome == 'success'
         name: Create comment
