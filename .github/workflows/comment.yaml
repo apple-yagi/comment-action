@@ -58,7 +58,7 @@ jobs:
         run: apt-get install fonts-ipafont-gothic
 
       - name: Install dependencies
-        run: pnpm install
+        run: npm install
 
       - if: ${{ !startsWith(github.event.comment.body, '/test-update-snapshots') }}
         name: Run test
