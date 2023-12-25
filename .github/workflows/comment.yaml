@@ -69,6 +69,23 @@ jobs:
         run: npx playwright@1.37.1 test --update-snapshots
         continue-on-error: true
 
+      - if: startsWith(github.event.comment.body, '/test-update-snapshots')
+        name: Diff
+        id: diff
+        run: |
+          git add -N .
+          git diff --name-only --exit-code
+        continue-on-error: true
+
+      - if: steps.diff.outcome == 'failure'
+        name: Commit diff
+        run: |
+          set -x
+          git config --global user.name actions-user
+          git config --global user.email action@github.com
+          git add .
+          git commit -m "Update snapshots"
+
       - if: steps.test.outcome == 'success' || steps.test-update-snapshots.outcome == 'success'
         name: Create comment
         uses: peter-evans/create-or-update-comment@23ff15729ef2fc348714a3bb66d2f655ca9066f2 # v3
